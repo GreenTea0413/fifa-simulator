@@ -14,7 +14,7 @@ import { PlayerCard, TierBadge } from './PlayerCard';
 import './App.css';
 
 const fmt = (n) => formatKoreanCurrency(n);
-const pct = (n) => `${(n * 100).toFixed(1)}%`;
+const pct = (n) => `${(n * 100).toFixed(2)}%`;
 const normalizeCost = (value) => formatKoreanCurrency(parseKoreanCurrency(value));
 
 function App() {
@@ -191,7 +191,7 @@ function App() {
           <div className="gauge-bar">
             <div className="gauge-fill" style={{ width: `${gaugePercent}%` }} />
           </div>
-          <span className="gauge-label">게이지 {gaugePercent.toFixed(0)}%</span>
+          <span className="gauge-label">게이지 {gaugePercent.toFixed(2)}%</span>
         </div>
         <div className="prob-display">
           최종 성공 확률 <strong>{pct(finalProb)}</strong>
