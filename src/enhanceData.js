@@ -1,3 +1,5 @@
+import { parseKoreanCurrency } from './koreanCurrency';
+
 // FC 온라인 선수 강화 성공 확률 / OVR 상승치
 // 출처: 넥슨 공식 공지 "(26.4 기준) 선수 강화 성공 확률, 강화 실패 시 복구 확률 및
 // 크리티컬 확률 안내"(fconline.nexon.com) + FC온라인 인벤 동일 자료로 교차 확인.
@@ -69,5 +71,5 @@ export function calcFinalProbability(baseRate, gaugePercent) {
 }
 
 export function sumMaterialCost(materials) {
-  return materials.reduce((sum, m) => sum + (Number(m.cost) || 0), 0);
+  return materials.reduce((sum, m) => sum + parseKoreanCurrency(m.cost), 0);
 }

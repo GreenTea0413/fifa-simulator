@@ -9,6 +9,7 @@ import {
   getStageInfo,
   sumMaterialCost,
 } from './enhanceData';
+import { parseKoreanCurrency } from './koreanCurrency';
 
 const STORAGE_KEY = 'fc-enhance-sim-v1';
 
@@ -77,7 +78,9 @@ function reducer(state, action) {
       const gaugePercent = calcGaugePercent(state.materials, state.targetOvr, state.tolerance);
       const finalProb = calcFinalProbability(stageInfo.successRate, gaugePercent);
       const materialCost = sumMaterialCost(state.materials);
-      const protectionCost = state.protectionEnabled ? Number(state.protectionCost) || 0 : 0;
+      const protectionCost = state.protectionEnabled
+        ? parseKoreanCurrency(state.protectionCost)
+        : 0;
       const attemptCost = materialCost + protectionCost;
       const isSuccess = Math.random() < finalProb;
 

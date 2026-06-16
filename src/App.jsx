@@ -9,10 +9,13 @@ import {
   sumMaterialCost,
 } from './enhanceData';
 import { useSimulatorState } from './useSimulatorState';
+import { formatKoreanCurrency, parseKoreanCurrency } from './koreanCurrency';
+import { PlayerCard, TierBadge } from './PlayerCard';
 import './App.css';
 
-const fmt = (n) => Math.round(n).toLocaleString('ko-KR');
+const fmt = (n) => formatKoreanCurrency(n);
 const pct = (n) => `${(n * 100).toFixed(1)}%`;
+const normalizeCost = (value) => formatKoreanCurrency(parseKoreanCurrency(value));
 
 function App() {
   const [state, dispatch] = useSimulatorState();
@@ -41,7 +44,8 @@ function App() {
   );
   const finalProb = stageInfo ? calcFinalProbability(stageInfo.successRate, gaugePercent) : 0;
   const materialCost = useMemo(() => sumMaterialCost(materials), [materials]);
-  const attemptCost = materialCost + (protectionEnabled ? Number(protectionCost) || 0 : 0);
+  const attemptCost =
+    materialCost + (protectionEnabled ? parseKoreanCurrency(protectionCost) : 0);
   const delta = isMaxed ? 0 : getDeltaOvr(targetStage);
 
   return (
@@ -53,6 +57,7 @@ function App() {
 
       <section className="card">
         <h2>강화 대상</h2>
+        <PlayerCard ovr={targetOvr} stage={targetStage} />
         <div className="row">
           <label>
             현재 OVR
@@ -93,7 +98,7 @@ function App() {
         <h2>강화 재료 (최대 {MAX_MATERIALS}개)</h2>
         {materials.map((m, i) => (
           <div className="material-row" key={i}>
-            <span className="material-index">{i + 1}</span>
+            <TierBadge ovr={m.ovr} />
             <input
               type="number"
               inputMode="numeric"
@@ -109,16 +114,24 @@ function App() {
               }
             />
             <input
-              type="number"
-              inputMode="numeric"
-              placeholder="비용"
+              type="text"
+              placeholder="비용 (예: 5억)"
               value={m.cost}
               onChange={(e) =>
                 dispatch({
                   type: 'SET_MATERIAL',
                   index: i,
                   field: 'cost',
-                  value: e.target.value === '' ? '' : Number(e.target.value),
+                  value: e.target.value,
+                })
+              }
+              onBlur={(e) =>
+                e.target.value &&
+                dispatch({
+                  type: 'SET_MATERIAL',
+                  index: i,
+                  field: 'cost',
+                  value: normalizeCost(e.target.value),
                 })
               }
             />
@@ -168,16 +181,16 @@ function App() {
           <label>
             보호 비용
             <input
-              type="number"
-              inputMode="numeric"
-              placeholder="비용"
+              type="text"
+              placeholder="비용 (예: 3000만)"
               disabled={!protectionEnabled}
               value={protectionCost}
               onChange={(e) =>
-                dispatch({
-                  type: 'SET_PROTECTION_COST',
-                  value: e.target.value === '' ? '' : Number(e.target.value),
-                })
+                dispatch({ type: 'SET_PROTECTION_COST', value: e.target.value })
+              }
+              onBlur={(e) =>
+                e.target.value &&
+                dispatch({ type: 'SET_PROTECTION_COST', value: normalizeCost(e.target.value) })
               }
             />
           </label>
