@@ -1,4 +1,5 @@
 import { parseKoreanCurrency } from './koreanCurrency';
+import { FULL_GAUGE_POINTS, getMaterialPoints } from './materialPoints';
 
 // FC 온라인 선수 강화 성공 확률 / OVR 상승치
 // 출처: 넥슨 공식 공지 "(26.4 기준) 선수 강화 성공 확률, 강화 실패 시 복구 확률 및
@@ -48,22 +49,16 @@ export function getDeltaOvr(stage) {
 
 export const MAX_MATERIALS = 5;
 
-// 재료 OVR -> 강화부스트 게이지(%) 근사 계산.
-// 넥슨은 "강화 포인트"가 재료 OVR로부터 어떻게 산정되는지 정확한 공식을
-// 공개하지 않았다 (공식 강화부스트 도우미도 BP 합계만 보여줄 뿐 산출식은 비공개).
-// 커뮤니티에서 확인되는 사실만 반영한 근사 모델:
-//  - 재료 OVR이 강화 대상 OVR 이상이면 슬롯 1칸(=1/5=20%) 가득 채움
-//  - 대상보다 낮으면 `tolerance` OVR차 구간 안에서 선형으로 감소, 그 이상 차이나면 0
-// tolerance는 실제 게임 관찰값으로 사용자가 직접 보정할 수 있도록 노출한다.
-export function calcGaugePercent(materials, targetOvr, tolerance) {
+// 재료 OVR -> 강화부스트 게이지(%) 계산.
+// 실측 재료표(materialPoints.js, 출처: canfactory.tistory.com/901)를 기반으로
+// 재료별 포인트를 합산한다. 풀게이지(FULL_GAUGE_POINTS=5)에 도달하면 100%.
+export function calcGaugePercent(materials, targetOvr, stage) {
   const slots = materials.slice(0, MAX_MATERIALS);
-  const totalRatio = slots.reduce((sum, m) => {
+  const totalPoints = slots.reduce((sum, m) => {
     if (m.ovr === '' || m.ovr === null || m.ovr === undefined) return sum;
-    const diff = Number(m.ovr) - targetOvr;
-    const ratio = diff >= 0 ? 1 : Math.max(0, 1 + diff / tolerance);
-    return sum + ratio;
+    return sum + getMaterialPoints(m.ovr, targetOvr, stage);
   }, 0);
-  return Math.min(100, (totalRatio / MAX_MATERIALS) * 100);
+  return Math.min(100, (totalPoints / FULL_GAUGE_POINTS) * 100);
 }
 
 export function calcFinalProbability(baseRate, gaugePercent) {

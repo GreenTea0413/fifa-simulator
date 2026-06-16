@@ -22,7 +22,6 @@ const defaultState = {
   materials: emptyMaterials(),
   protectionEnabled: false,
   protectionCost: '',
-  tolerance: 10,
   totalAttempts: 0,
   totalCost: 0,
   successCount: 0,
@@ -66,16 +65,14 @@ function reducer(state, action) {
       return { ...state, protectionEnabled: action.value };
     case 'SET_PROTECTION_COST':
       return { ...state, protectionCost: action.value };
-    case 'SET_TOLERANCE':
-      return { ...state, tolerance: action.value };
     case 'CLEAR_HISTORY':
       return { ...state, history: [] };
     case 'RESET_SESSION':
-      return { ...defaultState, tolerance: state.tolerance };
+      return { ...defaultState };
     case 'ATTEMPT': {
       if (state.targetStage >= MAX_STAGE) return state;
       const stageInfo = getStageInfo(state.targetStage);
-      const gaugePercent = calcGaugePercent(state.materials, state.targetOvr, state.tolerance);
+      const gaugePercent = calcGaugePercent(state.materials, state.targetOvr, state.targetStage);
       const finalProb = calcFinalProbability(stageInfo.successRate, gaugePercent);
       const materialCost = sumMaterialCost(state.materials);
       const protectionCost = state.protectionEnabled

@@ -202,22 +202,6 @@ input:disabled {
   padding: 4px 8px;
 }
 
-.advanced {
-  margin-top: 12px;
-  border-top: 1px solid var(--border);
-  padding-top: 12px;
-}
-
-.advanced summary {
-  font-size: 13px;
-  color: var(--text-dim);
-  cursor: pointer;
-}
-
-.tolerance-label {
-  margin-top: 10px;
-}
-
 .protection-row {
   flex-direction: column;
   gap: 12px;

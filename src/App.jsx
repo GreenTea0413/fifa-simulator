@@ -25,7 +25,6 @@ function App() {
     materials,
     protectionEnabled,
     protectionCost,
-    tolerance,
     totalAttempts,
     totalCost,
     successCount,
@@ -39,8 +38,8 @@ function App() {
   const isMaxed = targetStage >= MAX_STAGE;
   const stageInfo = isMaxed ? null : getStageInfo(targetStage);
   const gaugePercent = useMemo(
-    () => calcGaugePercent(materials, targetOvr, tolerance),
-    [materials, targetOvr, tolerance]
+    () => calcGaugePercent(materials, targetOvr, targetStage),
+    [materials, targetOvr, targetStage]
   );
   const finalProb = stageInfo ? calcFinalProbability(stageInfo.successRate, gaugePercent) : 0;
   const materialCost = useMemo(() => sumMaterialCost(materials), [materials]);
@@ -145,24 +144,10 @@ function App() {
             </button>
           </div>
         ))}
-        <details className="advanced">
-          <summary>고급 설정: 재료 보정값</summary>
-          <label className="tolerance-label">
-            재료 OVR이 대상보다 낮을 때, 게이지가 0이 되는 OVR차
-            <input
-              type="number"
-              inputMode="numeric"
-              value={tolerance}
-              onChange={(e) =>
-                dispatch({ type: 'SET_TOLERANCE', value: Number(e.target.value) || 1 })
-              }
-            />
-          </label>
-          <p className="hint small">
-            넥슨이 재료 OVR → 강화 포인트 환산식을 공개하지 않아 근사치입니다. 실제 게임에서
-            관찰한 값으로 직접 보정해보세요.
-          </p>
-        </details>
+        <p className="hint small">
+          재료 OVR과 대상 OVR 차이에 따른 실측 게이지표 기준으로 계산합니다 (8강 이후는 7강→8강
+          데이터로 근사).
+        </p>
       </section>
 
       <section className="card">
