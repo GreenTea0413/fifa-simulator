@@ -17,6 +17,29 @@ const fmt = (n) => formatKoreanCurrency(n);
 const pct = (n) => `${(n * 100).toFixed(2)}%`;
 const normalizeCost = (value) => formatKoreanCurrency(parseKoreanCurrency(value));
 
+// 붙여넣은 텍스트에서 숫자를 여러 개 뽑아 현재 칸부터 차례로 채운다.
+// (예: "130 128 125" 붙여넣기 -> 재료1,2,3의 OVR에 각각 채워짐)
+function distributeOvrPaste(dispatch, startIndex, text) {
+  const nums = text.match(/\d+/g);
+  if (!nums || nums.length === 0) return false;
+  nums.slice(0, MAX_MATERIALS - startIndex).forEach((n, offset) => {
+    dispatch({ type: 'SET_MATERIAL', index: startIndex + offset, field: 'ovr', value: Number(n) });
+  });
+  return true;
+}
+
+function distributeCostPaste(dispatch, startIndex, text) {
+  const tokens = text
+    .split(/[\s,;\n\r]+/)
+    .map((t) => t.trim())
+    .filter(Boolean);
+  if (tokens.length === 0) return false;
+  tokens.slice(0, MAX_MATERIALS - startIndex).forEach((t, offset) => {
+    dispatch({ type: 'SET_MATERIAL', index: startIndex + offset, field: 'cost', value: normalizeCost(t) });
+  });
+  return true;
+}
+
 function App() {
   const [state, dispatch] = useSimulatorState();
   const {
@@ -111,6 +134,10 @@ function App() {
                   value: e.target.value === '' ? '' : Number(e.target.value),
                 })
               }
+              onPaste={(e) => {
+                const text = e.clipboardData.getData('text');
+                if (distributeOvrPaste(dispatch, i, text)) e.preventDefault();
+              }}
             />
             <input
               type="text"
@@ -133,6 +160,10 @@ function App() {
                   value: normalizeCost(e.target.value),
                 })
               }
+              onPaste={(e) => {
+                const text = e.clipboardData.getData('text');
+                if (distributeCostPaste(dispatch, i, text)) e.preventDefault();
+              }}
             />
             <button
               type="button"
@@ -146,7 +177,8 @@ function App() {
         ))}
         <p className="hint small">
           재료 OVR과 대상 OVR 차이에 따른 실측 게이지표 기준으로 계산합니다 (8강 이후는 7강→8강
-          데이터로 근사).
+          데이터로 근사). OVR칸이나 비용칸에 여러 값을 한번에 붙여넣으면 그 자리부터 순서대로
+          채워집니다 (예: "130 128 125" 붙여넣기).
         </p>
       </section>
 
